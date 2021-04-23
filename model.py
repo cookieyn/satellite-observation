@@ -70,7 +70,11 @@ def decision(wstar, Astar, size, t, tl, tdds, hr, h, tdiffer, tArea, tmatch, num
     time1=time.time()
     m.optimize()
     print("\n\n-----optimal value-----")
-    print(m.ObjVal)
+    if m.ObjVal > -1 :
+        print(m.ObjVal)
+        return "Yes"
+    else :
+        return "No"
 
             
 

@@ -68,3 +68,4 @@ def differ_base(wstar, Astar, size, t, tl, tdds, hr, h, tdiffer, tArea, tmatch, 
     print("differ")
     print(minloss)
     print(count)
+    return count

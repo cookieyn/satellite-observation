@@ -1,6 +1,7 @@
 import numpy as np
 import random
 import math
+import xlrd
 
 def createOrbit(num_orbit, num_per_sate, inclination, h, R):
     r = R + h
@@ -105,7 +106,17 @@ def createObser(num,R,method):
             observation[i,1] = 0.206 * math.pi + random.random() * 0.41 * math.pi
             observation[i,2] = random.random() * 2 * math.pi
     if method == "population":
-        pass
+        latitude = [x*math.pi/180 for x in range(0, 180)]
+        longitude = [x*math.pi/180 for x in range(0, 360)]
+        xl = xlrd.open_workbook(r'population.xlsx')
+        table = xl.sheets()[0]
+        p_lati = table.col_values(0)[:180]
+        p_logi = table.col_values(1)
+        #还要变换成pi形式
+        for i in range(num):
+            observation[i,0] = R
+            observation[i,1] = np.random.choice(latitude, p = p_lati) + random.random() * 1 / 180 * math.pi
+            observation[i,2] = np.random.choice(longitude, p = p_logi) + random.random() * 1 / 180 * math.pi
     return observation
 
 def creatediffer(num_obser,num_sate,sigma,area):
@@ -116,12 +127,14 @@ def creatediffer(num_obser,num_sate,sigma,area):
             differ[i,j] = tdiffer
     return differ
 
-def orbit_generator(num_orbit, num_per_sate, inclination, h, R, num_obser, min_threld, obser_radius,sigma, min_monitor, method):
+def orbit_generator(num_orbit, num_per_sate, inclination, h, R, min_threld, obser_radius,sigma, min_monitor, method):
     num_sate = num_orbit * num_per_sate
     sate = createOrbit(num_orbit, num_per_sate, inclination, h, R)
-    return sate
+    sate = addOrbit(32, 50, 0.294*math.pi, 1110, sate, R)
+    num_sate = num_sate + 32 * 50 
+    return sate,num_sate
 
-def param_generator(sate, num_sate, inclination, h, R, num_obser, min_threld, obser_radius,sigma, min_monitor, method, id, filename):
+def param_generator(sate, num_sate, R, num_obser, min_threld, obser_radius,sigma, min_monitor, method, ind, filename):
     totalarea = np.zeros((num_obser,num_sate))
     obser = createObser(num_obser,R,method)
    
@@ -129,10 +142,11 @@ def param_generator(sate, num_sate, inclination, h, R, num_obser, min_threld, ob
     non_monitor = []
     total_num = 0
     for i in range(num_obser):
-        print(i)
+        #print(i)
         num_order = 0
         for j in range(num_sate):
             totalarea[i,j] = computeArea(sate,obser,i,j,obser_radius,R)
+            
             #print(totalarea[i,j])
             if totalarea[i,j] > min_threld:
                 num_order = num_order + 1
@@ -156,8 +170,8 @@ def param_generator(sate, num_sate, inclination, h, R, num_obser, min_threld, ob
     totaldiffer = creatediffer(num_obser,num_sate,sigma,totalarea)
     resmatch,resarea,resdiffer = match_change(num_obser,num_sate,max_monitor,totalarea,totaldiffer,min_threld)
     
-    np.save(filename+'\match_'+str(id)+'.npy',resmatch)
-    np.save(filename+'\differ_'+str(id)+'.npy',resdiffer)
-    np.save(filename+'\area_'+str(id)+'.npy',resarea)
+    np.save(filename+'/match_'+str(ind)+'.npy',resmatch)
+    np.save(filename+'/differ_'+str(ind)+'.npy',resdiffer)
+    np.save(filename+'/area_'+str(ind)+'.npy',resarea)
 
     return num_obser,max_monitor
