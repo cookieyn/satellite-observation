@@ -61,9 +61,12 @@ def computeArea(satellite,observation,i,j,obser_raius,R):
     x1 = observation[i,0] * math.sin(observation[i,1]) * math.cos(observation[i,2])
     y1 = observation[i,0] * math.sin(observation[i,1]) * math.sin(observation[i,2])
     z1 = observation[i,0] * math.cos(observation[i,1])
-    x2 = satellite[j,0] * math.sin(satellite[j,1]) * math.cos(satellite[j,2])
-    y2 = satellite[j,0] * math.sin(satellite[j,1]) * math.sin(satellite[j,2])
-    z2 = satellite[j,0] * math.cos(satellite[j,1])
+#    x2 = satellite[j,0] * math.sin(satellite[j,1]) * math.cos(satellite[j,2])
+#    y2 = satellite[j,0] * math.sin(satellite[j,1]) * math.sin(satellite[j,2])
+#    z2 = satellite[j,0] * math.cos(satellite[j,1])
+    x2 = R * math.sin(satellite[j,1]) * math.cos(satellite[j,2])
+    y2 = R * math.sin(satellite[j,1]) * math.sin(satellite[j,2])
+    z2 = sR * math.cos(satellite[j,1])
     c = math.sqrt((x2-x1)**2 + (y2-y1)**2 + (z2-z1)**2)
     #print(a,b,c)
     if c > (a + b):
@@ -89,9 +92,12 @@ def computesingleArea(satellite,r,theta,pi,obser_radius,R,satenum,min_threld):
     num_order = 0
     tarea = []
     for j in range(satenum):
-        x2 = satellite[j,0] * math.sin(satellite[j,1]) * math.cos(satellite[j,2])
-        y2 = satellite[j,0] * math.sin(satellite[j,1]) * math.sin(satellite[j,2])
-        z2 = satellite[j,0] * math.cos(satellite[j,1])
+#        x2 = satellite[j,0] * math.sin(satellite[j,1]) * math.cos(satellite[j,2])
+#        y2 = satellite[j,0] * math.sin(satellite[j,1]) * math.sin(satellite[j,2])
+#        z2 = satellite[j,0] * math.cos(satellite[j,1])
+        x2 = R * math.sin(satellite[j,1]) * math.cos(satellite[j,2])
+        y2 = R * math.sin(satellite[j,1]) * math.sin(satellite[j,2])
+        z2 = sR * math.cos(satellite[j,1])
         c = math.sqrt((x2-x1)**2 + (y2-y1)**2 + (z2-z1)**2)
         #print(a,b,c)
         if c > (a + b):

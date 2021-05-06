@@ -11,7 +11,7 @@ import xlrd
 num_orbit = 72
 num_per_sate = 22
 inclination = 0.294 * math.pi /2
-h = 550
+h_orbit = 550
 R = 6371
 #num_obser = 1000
 min_threld = 0.05
@@ -30,7 +30,7 @@ tdds = 1e-6
 hr = 0.3
 h = 1
 
-sate,num_sate = orbit_generator(num_orbit, num_per_sate, inclination, h, R, min_threld, obser_radius,sigma, min_monitor, method)
+sate,num_sate = orbit_generator(num_orbit, num_per_sate, inclination, h_orbit, R, min_threld, obser_radius,sigma, min_monitor, method)
 f = xlwt.Workbook()
 for total in range(1000,10000,1000):
     filename = "exp2_"+str(total)
