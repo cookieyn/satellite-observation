@@ -4,11 +4,12 @@ import numpy as np
 import random
 import time
 
-def decision(wstar, Astar, size, t, tl, tdds, hr, h, tdiffer, tArea, tmatch, num_obser, max_monitor):
+def decision(wstar, Astar, size, t, tl, tdds, hr, h, tdiffer, tArea, tmatch, num_obser, max_monitor, num_sate):
     differ = tdiffer.copy()
     Area = tArea.copy()
     match = tmatch.copy()
     m = gp.Model('control')
+    m.setParam('TimeLimit', 40)
     X = {}
     lr = {}
     y = {}
@@ -32,13 +33,23 @@ def decision(wstar, Astar, size, t, tl, tdds, hr, h, tdiffer, tArea, tmatch, num
         #if num > 0 :
             #print(num)
 
-    lhs1 = gp.LinExpr(0) 
+    # lhs1 = gp.LinExpr(0)
+    # c1 =  h * hr *size
+    # for i in range(num_obser):
+    #     for j in range(max_monitor):
+    #         lhs1.addTerms(c1/t,X[i,j])  
+    #         lhs1.addTerms(size/t,y[i,j])
+    # m.addConstr(lhs1 <= wstar, name= "bandwidth") 
+
+    lhs1 = [gp.LinExpr(0) for i in range(num_sate)]
     c1 =  h * hr *size
     for i in range(num_obser):
         for j in range(max_monitor):
-            lhs1.addTerms(c1/t,X[i,j])  
-            lhs1.addTerms(size/t,y[i,j])
-    m.addConstr(lhs1 <= wstar, name= "bandwidth") 
+            if match[i,j] > -1 :
+                lhs1[int(match[i,j])].addTerms(c1/t,X[i,j])
+                lhs1[int(match[i,j])].addTerms(size/t,y[i,j])
+    for i in range(num_sate):
+        m.addConstr(lhs1[i] <= wstar, name = "bandwidth"+str(i)+"-"+str(j))
 
     lhs2 = gp.LinExpr(0) 
     c2 = tdds
@@ -63,18 +74,19 @@ def decision(wstar, Astar, size, t, tl, tdds, hr, h, tdiffer, tArea, tmatch, num
     obj = gp.LinExpr(0)
     for i in range(num_obser):
         for j in range(max_monitor):
-            obj.addConstant(differ[i,j]*Area[i,j])
-            obj.addTerms(-1*differ[i,j]*Area[i,j], y[i,j])
+            obj.addConstant(differ[i,j])
+            obj.addTerms(-1*differ[i,j], y[i,j])
     m.setObjective(obj, GRB.MINIMIZE)  
     print("yuesu")
     time1=time.time()
     m.optimize()
     print("\n\n-----optimal value-----")
-    if m.ObjVal > -1 :
+    try : 
         print(m.ObjVal)
-        return "Yes"
-    else :
+    except AttributeError :
         return "No"
+    else :
+        return "Yes"
 
             
 

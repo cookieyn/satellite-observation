@@ -66,7 +66,8 @@ def computeArea(satellite,observation,i,j,obser_raius,R):
 #    z2 = satellite[j,0] * math.cos(satellite[j,1])
     x2 = R * math.sin(satellite[j,1]) * math.cos(satellite[j,2])
     y2 = R * math.sin(satellite[j,1]) * math.sin(satellite[j,2])
-    z2 = sR * math.cos(satellite[j,1])
+    z2 = R * math.cos(satellite[j,1])
+    
     c = math.sqrt((x2-x1)**2 + (y2-y1)**2 + (z2-z1)**2)
     #print(a,b,c)
     if c > (a + b):
@@ -92,12 +93,14 @@ def computesingleArea(satellite,r,theta,pi,obser_radius,R,satenum,min_threld):
     num_order = 0
     tarea = []
     for j in range(satenum):
-#        x2 = satellite[j,0] * math.sin(satellite[j,1]) * math.cos(satellite[j,2])
-#        y2 = satellite[j,0] * math.sin(satellite[j,1]) * math.sin(satellite[j,2])
-#        z2 = satellite[j,0] * math.cos(satellite[j,1])
+        #x2 = satellite[j,0] * math.sin(satellite[j,1]) * math.cos(satellite[j,2])
+        #y2 = satellite[j,0] * math.sin(satellite[j,1]) * math.sin(satellite[j,2])
+        #z2 = satellite[j,0] * math.cos(satellite[j,1])
+        #print(satellite[j,0])
         x2 = R * math.sin(satellite[j,1]) * math.cos(satellite[j,2])
         y2 = R * math.sin(satellite[j,1]) * math.sin(satellite[j,2])
-        z2 = sR * math.cos(satellite[j,1])
+        z2 = R * math.cos(satellite[j,1])
+        #print(math.sqrt(x2 ** 2 + y2 ** 2 + z2 ** 2))
         c = math.sqrt((x2-x1)**2 + (y2-y1)**2 + (z2-z1)**2)
         #print(a,b,c)
         if c > (a + b):
@@ -113,7 +116,9 @@ def computesingleArea(satellite,r,theta,pi,obser_radius,R,satenum,min_threld):
             area = overlapa / (math.pi * a ** 2)
         if area > min_threld :
             num_order = num_order + 1
-        tarea.append(area)
+            tarea.append(1.0)
+        else :
+            tarea.append(0.0)
     if num_order > 0:
         flag = True
     else :
@@ -139,7 +144,7 @@ def match_change(num_obser,num_sate,max_monitor,totalarea,totaldiffer,min_threld
                 order = order + 1
     return match,overlap_area,tempdiffer
 
-def createObser(num,R,method,satellite,obser_radius,satenum,min_threld):
+def createObser(num,R,method,satellite,obser_radius,satenum,min_threld, ind, filename):
     observation = np.zeros((num,3))
     totalarea = np.zeros((num,satenum))
     if method == "random":
@@ -173,6 +178,7 @@ def createObser(num,R,method,satellite,obser_radius,satenum,min_threld):
                 if ordernum > tmax_monitor:
                     tmax_monitor = ordernum
                 totalnum = totalnum + ordernum
+        np.save(filename+'/totalarea_'+str(ind)+'.npy',totalarea)
     return observation, totalarea, tmax_monitor, totalnum
 
 def creatediffer(num_obser,num_sate,sigma,area):
@@ -185,6 +191,7 @@ def creatediffer(num_obser,num_sate,sigma,area):
 
 def orbit_generator(num_orbit, num_per_sate, inclination, h, R, min_threld, obser_radius,sigma, min_monitor, method):
     num_sate = num_orbit * num_per_sate
+    print(h)
     sate = createOrbit(num_orbit, num_per_sate, inclination, h, R)
     sate = addOrbit(32, 50, 0.294*math.pi, 1110, sate, R)
     num_sate = num_sate + 32 * 50 
@@ -192,13 +199,13 @@ def orbit_generator(num_orbit, num_per_sate, inclination, h, R, min_threld, obse
 
 def param_generator(sate, num_sate, R, num_obser, min_threld, obser_radius,sigma, min_monitor, method, ind, filename):
     #totalarea = np.zeros((num_obser,num_sate))
-    obser,totalarea,max_monitor,total_num = createObser(num_obser,R,method,sate,obser_radius,num_sate,min_threld)
+    obser,totalarea,max_monitor,total_num = createObser(num_obser,R,method,sate,obser_radius,num_sate,min_threld, ind, filename)
     print("avarage sate:")
     print(total_num/num_obser)
-    print("shape,obser number,max monitor:")
-    print(totalarea.shape)
-    print(num_obser)
-    print(max_monitor)
+    #print("shape,obser number,max monitor:")
+    #print(totalarea.shape)
+    #print(num_obser)
+    #print(max_monitor)
     
     totaldiffer = creatediffer(num_obser,num_sate,sigma,totalarea)
     resmatch,resarea,resdiffer = match_change(num_obser,num_sate,max_monitor,totalarea,totaldiffer,min_threld)
